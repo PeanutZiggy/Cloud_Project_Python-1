@@ -4,12 +4,36 @@ from tkinter import *
 import os
 
 
+'''
+These individual delete functions closes the pop up windows once login has been successful.
+Other than that, their is no other significance.
+'''
+
+'''
+Delete 2 Function:
+Once login is successful it will close the success message window.
+'''
+
+
 def delete2():
     screen3.destroy()
 
 
+'''
+Delete 3 Function:
+Password error during login so it will then output error message then this function will close
+error message window.
+'''
+
+
 def delete3():
     screen4.destroy()
+
+
+'''
+Delete 4 Function:
+If user not found this function closes the error message window.
+'''
 
 
 def delete4():
