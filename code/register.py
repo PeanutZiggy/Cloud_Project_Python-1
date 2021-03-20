@@ -3,6 +3,22 @@
 from tkinter import *
 
 
+def register_user():
+    username_info = username.get()
+    password_info = password.get()
+
+    file = open(username_info+".txt", "w")
+    file.write(username_info+"\n")
+    file.write(password_info)
+    file.close()
+
+    username_entry.delete(0, END)
+    password_entry.delete(0, END)
+
+    Label(screen1, text="Registration Sucess",
+          fg="green", font=("calibri", 11)).pack()
+
+
 def register():
     global screen1
     screen1 = Toplevel(screen)
