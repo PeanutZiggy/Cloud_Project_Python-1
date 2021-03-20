@@ -1,6 +1,47 @@
 # Registration & Login GUI
 
 from tkinter import *
+import os
+
+
+def delete2():
+    screen3.destroy()
+
+
+def delete3():
+    screen4.destroy()
+
+
+def delete4():
+    screen5.destroy()
+
+
+def login_sucess():
+    global screen3
+    screen3 = Toplevel(screen)
+    screen3.title("Success")
+    screen3.geometry("150x100")
+    Label(screen3, text="Login Sucess").pack()
+    Button(screen3, text="OK", command=delete2).pack()
+
+
+def password_not_recognised():
+    global screen4
+    screen4 = Toplevel(screen)
+    screen4.title("Success")
+    screen4.geometry("150x100")
+    Label(screen4, text="Password Error").pack()
+    Button(screen4, text="OK", command=delete3).pack()
+
+
+def user_not_found():
+    global screen5
+    screen5 = Toplevel(screen)
+    screen5.title("Success")
+    screen5.geometry("150x100")
+    Label(screen5, text="User Not Found").pack()
+    Button(screen5, text="OK", command=delete4).pack()
+
 
 '''
 Register User Function:
