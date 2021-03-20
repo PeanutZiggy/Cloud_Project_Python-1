@@ -29,6 +29,10 @@ def register():
            height=1, command=register_user).pack()
 
 
+def login():
+    print("Login session started!")
+
+
 def main_screen():
     screen = Tk()
     screen.geometry("300x250")
