@@ -32,7 +32,7 @@ def register():
     username = StringVar()
     password = StringVar()
 
-    Label(screen1, text="Please enter details below").pack()
+    Label(screen1, text="Registration Details: ").pack()
     Label(screen1, text="").pack()
     Label(screen1, text="Username * ").pack()
     username_entry = Entry(screen1, textvariable=username)
@@ -50,6 +50,7 @@ def login():
 
 
 def main_screen():
+    global screen
     screen = Tk()
     screen.geometry("300x250")
     screen.title("Notes 1.0")
