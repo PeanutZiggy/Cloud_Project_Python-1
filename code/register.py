@@ -16,12 +16,12 @@ def delete4():
     screen5.destroy()
 
 
-def login_sucess():
+def login_success():
     global screen3
     screen3 = Toplevel(screen)
     screen3.title("Success")
     screen3.geometry("150x100")
-    Label(screen3, text="Login Sucess").pack()
+    Label(screen3, text="Login Success").pack()
     Button(screen3, text="OK", command=delete2).pack()
 
 
@@ -66,7 +66,7 @@ def register_user():
     username_entry.delete(0, END)
     password_entry.delete(0, END)
 
-    Label(screen1, text="Registration Sucess",
+    Label(screen1, text="Registration Success",
           fg="green", font=("calibri", 11)).pack()
 
 
@@ -82,7 +82,7 @@ def login_verify():
         file1 = open(username1, "r")
         verify = file1.read().splitlines()
         if password1 in verify:
-            login_sucess()
+            login_success()
         else:
             password_not_recognised()
 
@@ -111,7 +111,7 @@ def register():
     username = StringVar()
     password = StringVar()
 
-    Label(screen1, text="Please enter details below").pack()
+    Label(screen1, text="Create Registation: ").pack()
     Label(screen1, text="").pack()
     Label(screen1, text="Username * ").pack()
 
@@ -130,7 +130,7 @@ def login():
     screen2 = Toplevel(screen)
     screen2.title("Login")
     screen2.geometry("300x250")
-    Label(screen2, text="Please enter details below to login").pack()
+    Label(screen2, text="Enter Login: ").pack()
     Label(screen2, text="").pack()
 
     global username_verify
