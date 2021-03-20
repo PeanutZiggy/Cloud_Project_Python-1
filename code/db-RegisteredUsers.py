@@ -58,4 +58,4 @@ SQL_Engine = create_engine("mysql+mysqlconnector://{user}:{pw}@{host}/{db}"
                                    db=config.db_name))
 
 # Inserting entire DataFrame into MySQL Server.
-df.to_sql('Login_Credentials', con=SQL_Engine, if_exists='append')
+df.to_sql('db-registeredusers', con=SQL_Engine, if_exists='append')
