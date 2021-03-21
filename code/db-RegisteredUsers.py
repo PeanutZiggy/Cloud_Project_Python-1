@@ -9,8 +9,7 @@ from sqlalchemy import create_engine
 
 # CSV import
 # Team Members: Change your path accordingly as folders can vary.
-data_frame = pd.read_csv(
-    '/Users/saffanahmed/Documents/Cloud_Project_Python/code/user_credentials.csv')
+df = pd.read_csv('users.csv')
 
 # SQL Setup: Connecting to the MySQL Server and Creating a Database for Registered Users
 connectingSQLServer = mysql.connector.connect(
@@ -21,7 +20,7 @@ print(connectingSQLServer)
 
 cursor = connectingSQLServer.cursor()
 # Database Entity
-db_name = 'db-registeredusers'
+db_name = 'users'
 
 # Creating the Database
 
@@ -58,4 +57,4 @@ SQL_Engine = create_engine("mysql+mysqlconnector://{user}:{pw}@{host}/{db}"
                                    db=config.db_name))
 
 # Inserting entire DataFrame into MySQL Server.
-df.to_sql('db-registeredusers', con=SQL_Engine, if_exists='append')
+df.to_sql('users', con=SQL_Engine, if_exists='append')

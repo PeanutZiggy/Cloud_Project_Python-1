@@ -2,7 +2,15 @@
 
 from tkinter import *
 import os
+import config
+import mysql.connector
 
+
+connectingSQLServer = mysql.connector.connect(
+    host=config.host,
+    user=config.username,
+    password=config.password)
+print(connectingSQLServer)
 
 '''
 These individual delete functions closes the pop up windows once login has been successful.
