@@ -52,6 +52,8 @@ def delete_all_reminders(from_bucket):
     for obj in client.Bucket(from_bucket).objects.all():
         client.Object(from_bucket, obj.key).delete()
 
+# Display All Reminders - Aim of this function is to prompt user regarding upcoming reminders.
+
 
 def display_all_reminders(from_bucket):
     for obj in client.Bucket(from_bucket).objects.all():
