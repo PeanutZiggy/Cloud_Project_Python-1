@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk as ttk
 import tkinter.messagebox
 import mysql.connector
 
@@ -49,10 +50,12 @@ def logged():
     global logged_message
     logged_message = Toplevel(root2)
     logged_message.title("Welcome")
-    logged_message.geometry("500x100")
+    logged_message.geometry("500x130")
     Label(logged_message, text="Login Successfully!... Welcome {} ".format(
         username_verification.get()), fg="green", font="bold").pack()
     Label(logged_message, text="").pack()
+    Button(logged_message, text="Note", bg="blue", fg='white', relief="groove",
+           font=('arial', 12, 'bold'), command=note).pack()
     Button(logged_message, text="Logout", bg="blue", fg='white', relief="groove",
            font=('arial', 12, 'bold'), command=logged_destroy).pack()
 
@@ -126,6 +129,50 @@ def register():
     Button(root2, text="Login", bg="blue", fg='white', relief="groove",
            font=('arial', 12, 'bold'), command=create_user).pack()
     Label(root2, text="")
+
+
+def retrieve_note():
+    sql = '''
+    IF object_id("note") is not null
+        PRINT "Present!"
+    ELSE
+        PRINT "Not accounted for"'''
+    cursordb.execute(sql)
+    connectiondb.commit()
+
+
+def save_note():
+    note = content.get()
+    user_note = username_verification.get()
+    sql = "insert into users.users (username, note) values (%s, %s)"
+    cursordb.execute(sql, [(user_note), (note)])
+    connectiondb.commit()
+    print(cursordb.rowcount, "note saved.")
+
+
+def note():
+    global note
+    note = Toplevel(root)
+    note.title("Note")
+    note.geometry("900x800")
+    note.config(bg="white")
+    tc = ttk.Notebook(note)
+    tab = ttk.Frame(tc)
+    tc.add(tab, text ='Notebook')
+    tc.pack(fill ="both")
+
+    #retrieve_note()
+
+    global content
+
+    ttk.Label(tab,
+    text ="Welcome To Notebook").grid(column = 3, row = 3)
+    
+    content = StringVar()
+    Entry(note, textvariable=content).pack()
+    Button(note, text="Save", bg="blue", fg='white', relief="groove",
+            font=('arial', 12, 'bold'), command=save_note).pack()
+
 
 
 def main_display():

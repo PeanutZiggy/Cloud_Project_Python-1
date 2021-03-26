@@ -1,4 +1,5 @@
 # Prequisite Modules
+import os
 import pandas as pd
 import config
 
@@ -9,7 +10,7 @@ from sqlalchemy import create_engine
 
 # CSV import
 # Team Members: Change your path accordingly as folders can vary.
-df = pd.read_csv('users.csv')
+df = pd.read_csv(os.path.join('users.csv'))
 
 # SQL Setup: Connecting to the MySQL Server and Creating a Database for Registered Users
 connectingSQLServer = mysql.connector.connect(
