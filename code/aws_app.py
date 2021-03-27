@@ -40,7 +40,7 @@ def create_temp_file(file_name, content):
     #file_content = create_note()
 
     with open(file_name, 'w') as f:
-        #f.write(str(file_content))
+        # f.write(str(file_content))
         f.write(str(content))
     return file_name
 
@@ -78,8 +78,26 @@ def display_all_reminders(from_bucket):
     #     return temp_dict
     # else:
     #     print('bucket is empty')
-    temp_dict = {}
+
+    # temp_dict = {}
+    # for obj in client.Bucket(from_bucket).objects.all():
+    #     print(obj.key)
+    #     temp_dict[obj.key] = obj.value
+    # return temp_dict
+
+    # it says key but that does not mean that it is a dictionary
+    # its just how s3 works
+    tmp_list = []
     for obj in client.Bucket(from_bucket).objects.all():
-        print(obj.key)
-        temp_dict[obj.key] = obj.value
-    return temp_dict
+        tmp_list.append(obj.key)
+
+    return tmp_list
+
+# extract the text from the file to display it
+
+
+def get_reminder_text(from_bucket, from_object):
+
+    obj = client.Object(from_bucket, from_object)
+
+    return obj.get()['Body'].read().decode('utf-8')

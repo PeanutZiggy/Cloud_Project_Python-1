@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk as ttk
 import tkinter.messagebox
 import mysql.connector
-from aws_app import *
+import aws_app
 
 
 # connecting to the database
@@ -135,36 +135,32 @@ def register():
     Label(root2, text="")
 
 
-def retrieve_note():
-    sql = '''
-    IF object_id("note") is not null
-        PRINT "Present!"
-    ELSE
-        PRINT "Not accounted for"'''
-    cursordb.execute(sql)
-    connectiondb.commit()
+# def retrieve_note():
+#     sql = '''
+#     IF object_id("note") is not null
+#         PRINT "Present!"
+#     ELSE
+#         PRINT "Not accounted for"'''
+#     cursordb.execute(sql)
+#     connectiondb.commit()
 
 
-def save_note():
-    note = content.get()
-    file_name = file_name_temp.get()
-    user_note = username_verification.get()
-    file = create_temp_file(file_name)
-    upload_file(user_note, file)
-    print("note saved")
-    # sql = "insert into users.users (username, note) values (%s, %s)"
-    # cursordb.execute(sql, [(user_note), (note)])
-    # connectiondb.commit()
-    # print(cursordb.rowcount, "note saved.")
-
-
+#################################################
+# in the final version of the app
+# files will be uploaded in bucket
+# with the name of the user (replacing the firstpybucket)
+# when a new user is registered
+# new bucket is created
+# when logged in - variable will hold the name of the user
+# which will be the name of the bucket
+######################################################
 def create_note():
     note = content.get()
     file_name = file_name_temp.get()
     file_name = f'{file_name}.txt'
     user_note = username_verification.get()
-    file = create_temp_file(file_name, note)
-    upload_file(user_note, file)
+    file = aws_app.create_temp_file(file_name, note)
+    aws_app.upload_file('firstpybucket', file)
     print("note saved")
 
 
@@ -174,25 +170,39 @@ def new_note_page():
     note.title("Note")
     note.geometry("900x800")
     note.config(bg="white")
-    tc = ttk.Notebook(note)    
+    tc = ttk.Notebook(note)
 
     tab = ttk.Frame(tc)
-    tc.add(tab, text ='Notebook')
-    tc.pack(fill ="both")
-    
+    tc.add(tab, text='Notebook')
+    tc.pack(fill="both")
+
     global content
     global file_name_temp
     content = StringVar()
     file_name_temp = StringVar()
 
-    ttk.Label(tab, text = "Please put your note here").pack(fill="both")
-    ttk.Label(tab, text = "Name").pack(fill="both")
-    
+    ttk.Label(tab, text="Please put your note here").pack(fill="both")
+    ttk.Label(tab, text="Name").pack(fill="both")
+
     Entry(tab, textvariable=file_name_temp).pack()
-    ttk.Label(tab, text = "Note").pack(fill="both")
+    ttk.Label(tab, text="Note").pack(fill="both")
     Entry(tab, textvariable=content).pack()
     Button(tab, text="Add", bg="blue", fg='white', relief="groove",
-            font=('arial', 12, 'bold'), command=create_note).pack()
+           font=('arial', 12, 'bold'), command=create_note).pack()
+
+
+def save_note():
+    note = content.get()
+    file_name = file_name_temp.get()
+    user_note = username_verification.get()
+    file = aws_app.create_temp_file(file_name)
+    # upload_file(user_note, file)
+    aws_app.upload_file('firstpybucket', file)
+    print("note saved")
+    # sql = "insert into users.users (username, note) values (%s, %s)"
+    # cursordb.execute(sql, [(user_note), (note)])
+    # connectiondb.commit()
+    # print(cursordb.rowcount, "note saved.")
 
 
 def exist_note_page():
@@ -202,25 +212,27 @@ def exist_note_page():
     note.geometry("900x800")
     note.config(bg="white")
     tc = ttk.Notebook(note)
-    note_dict = display_all_reminders(username_verification.get())
+    note_list = aws_app.display_all_reminders('firstpybucket')
 
-    for key,value in note_dict:
+    current_content = ''
+    for value in note_list:
         tab = ttk.Frame(tc)
-        tc.add(tab, text = value)
-        tc.pack(fill ="both")
+        tc.add(tab, text=value)
+        tc.pack(fill="both")
+        current_content = aws_app.get_reminder_text('firstpybucket', value)
+
+        ttk.Label(tab,
+                  text=current_content).pack(fill="both")
 
     global content
-
-    ttk.Label(tab,
-    text ="Welcome To Notebook").pack(fill ="both")
-    
     content = StringVar()
-    Entry(note, textvariable=content).pack()
-    Button(note, text="Add", bg="blue", fg='white', relief="groove",
-            font=('arial', 12, 'bold'), command=save_note).pack()
-    Button(note, text="Save", bg="blue", fg='white', relief="groove",
-            font=('arial', 12, 'bold'), command=save_note).pack()
 
+    Entry(note,
+          textvariable=content).pack(fill='both')
+    Button(note, text="Add", bg="blue", fg='white', relief="groove",
+           font=('arial', 12, 'bold'), command=save_note).pack()
+    Button(note, text="Save", bg="blue", fg='white', relief="groove",
+           font=('arial', 12, 'bold'), command=save_note).pack()
 
 
 def main_display():
