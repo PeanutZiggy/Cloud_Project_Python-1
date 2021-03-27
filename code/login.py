@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk as ttk
 import tkinter.messagebox
 import mysql.connector
+from aws_app import *
 
 
 # connecting to the database
@@ -54,8 +55,10 @@ def logged():
     Label(logged_message, text="Login Successfully!... Welcome {} ".format(
         username_verification.get()), fg="green", font="bold").pack()
     Label(logged_message, text="").pack()
-    Button(logged_message, text="Note", bg="blue", fg='white', relief="groove",
-           font=('arial', 12, 'bold'), command=note).pack()
+    Button(logged_message, text="Create Note", bg="blue", fg='white', relief="groove",
+           font=('arial', 12, 'bold'), command=new_note_page).pack()
+    Button(logged_message, text="Edit Note", bg="blue", fg='white', relief="groove",
+           font=('arial', 12, 'bold'), command=exist_note_page).pack()
     Button(logged_message, text="Logout", bg="blue", fg='white', relief="groove",
            font=('arial', 12, 'bold'), command=logged_destroy).pack()
 
@@ -101,6 +104,7 @@ def create_user():
     cursordb.execute(sql, [(user_new), (pass_new)])
     connectiondb.commit()
     print(cursordb.rowcount, "record inserted.")
+    create_bucket(user_new, client)
 
 
 def register():
@@ -143,33 +147,77 @@ def retrieve_note():
 
 def save_note():
     note = content.get()
+    file_name = file_name_temp.get()
     user_note = username_verification.get()
-    sql = "insert into users.users (username, note) values (%s, %s)"
-    cursordb.execute(sql, [(user_note), (note)])
-    connectiondb.commit()
-    print(cursordb.rowcount, "note saved.")
+    file = create_temp_file(file_name)
+    upload_file(user_note, file)
+    print("note saved")
+    # sql = "insert into users.users (username, note) values (%s, %s)"
+    # cursordb.execute(sql, [(user_note), (note)])
+    # connectiondb.commit()
+    # print(cursordb.rowcount, "note saved.")
 
 
-def note():
+def create_note():
+    note = content.get()
+    file_name = file_name_temp.get()
+    file_name = f'{file_name}.txt'
+    user_note = username_verification.get()
+    file = create_temp_file(file_name, note)
+    upload_file(user_note, file)
+    print("note saved")
+
+
+def new_note_page():
+    global note
+    note = Toplevel(root)
+    note.title("Note")
+    note.geometry("900x800")
+    note.config(bg="white")
+    tc = ttk.Notebook(note)    
+
+    tab = ttk.Frame(tc)
+    tc.add(tab, text ='Notebook')
+    tc.pack(fill ="both")
+    
+    global content
+    global file_name_temp
+    content = StringVar()
+    file_name_temp = StringVar()
+
+    ttk.Label(tab, text = "Please put your note here").pack(fill="both")
+    ttk.Label(tab, text = "Name").pack(fill="both")
+    
+    Entry(tab, textvariable=file_name_temp).pack()
+    ttk.Label(tab, text = "Note").pack(fill="both")
+    Entry(tab, textvariable=content).pack()
+    Button(tab, text="Add", bg="blue", fg='white', relief="groove",
+            font=('arial', 12, 'bold'), command=create_note).pack()
+
+
+def exist_note_page():
     global note
     note = Toplevel(root)
     note.title("Note")
     note.geometry("900x800")
     note.config(bg="white")
     tc = ttk.Notebook(note)
-    tab = ttk.Frame(tc)
-    tc.add(tab, text ='Notebook')
-    tc.pack(fill ="both")
+    note_dict = display_all_reminders(username_verification.get())
 
-    #retrieve_note()
+    for key,value in note_dict:
+        tab = ttk.Frame(tc)
+        tc.add(tab, text = value)
+        tc.pack(fill ="both")
 
     global content
 
     ttk.Label(tab,
-    text ="Welcome To Notebook").grid(column = 3, row = 3)
+    text ="Welcome To Notebook").pack(fill ="both")
     
     content = StringVar()
     Entry(note, textvariable=content).pack()
+    Button(note, text="Add", bg="blue", fg='white', relief="groove",
+            font=('arial', 12, 'bold'), command=save_note).pack()
     Button(note, text="Save", bg="blue", fg='white', relief="groove",
             font=('arial', 12, 'bold'), command=save_note).pack()
 

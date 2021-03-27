@@ -36,11 +36,12 @@ def upload_file(bucket_name, file_name):
     client.Object(bucket_name, file_name).upload_file(Filename=file_name)
 
 
-def create_temp_file(file_name):
-    file_content = create_note()
+def create_temp_file(file_name, content):
+    #file_content = create_note()
 
     with open(file_name, 'w') as f:
-        f.write(str(file_content))
+        #f.write(str(file_content))
+        f.write(str(content))
     return file_name
 
 # Upload Reminder  - Aim of this function is to upload reminders.
@@ -68,5 +69,17 @@ def delete_all_reminders(from_bucket):
 
 
 def display_all_reminders(from_bucket):
+    # temp_dict = {}
+    # num = len(client.Bucket(from_bucket).objects.all())
+    # if num > 0:
+    #     for obj in client.Bucket(from_bucket).objects.all():
+    #         print(obj.key)
+    #         temp_dict[obj.key] = obj.value
+    #     return temp_dict
+    # else:
+    #     print('bucket is empty')
+    temp_dict = {}
     for obj in client.Bucket(from_bucket).objects.all():
         print(obj.key)
+        temp_dict[obj.key] = obj.value
+    return temp_dict
