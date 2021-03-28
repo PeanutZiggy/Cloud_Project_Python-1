@@ -3,6 +3,7 @@ from tkinter import ttk as ttk
 import tkinter.messagebox
 import mysql.connector
 import aws_app
+from functools import partial
 
 
 # connecting to the database
@@ -51,7 +52,7 @@ def logged():
     global logged_message
     logged_message = Toplevel(root2)
     logged_message.title("Welcome")
-    logged_message.geometry("500x130")
+    logged_message.geometry("500x200")
     Label(logged_message, text="Login Successfully!... Welcome {} ".format(
         username_verification.get()), fg="green", font="bold").pack()
     Label(logged_message, text="").pack()
@@ -135,16 +136,6 @@ def register():
     Label(root2, text="")
 
 
-# def retrieve_note():
-#     sql = '''
-#     IF object_id("note") is not null
-#         PRINT "Present!"
-#     ELSE
-#         PRINT "Not accounted for"'''
-#     cursordb.execute(sql)
-#     connectiondb.commit()
-
-
 #################################################
 # in the final version of the app
 # files will be uploaded in bucket
@@ -191,18 +182,28 @@ def new_note_page():
            font=('arial', 12, 'bold'), command=create_note).pack()
 
 
-def save_note():
-    note = content.get()
-    file_name = file_name_temp.get()
+def delete_and_update_note(index):
+    # print(note_list)
+    # print(index)
+    aws_app.delete_reminder('firstpybucket', note_list[index])
+    # print(content_list[index].get())
+    print('note deleted')
+    note = content_list[index].get()
+    file_name = note_list[index]
+    file_name = f'{file_name}.txt'
     user_note = username_verification.get()
-    file = aws_app.create_temp_file(file_name)
-    # upload_file(user_note, file)
+    file = aws_app.create_temp_file(file_name, note)
     aws_app.upload_file('firstpybucket', file)
-    print("note saved")
-    # sql = "insert into users.users (username, note) values (%s, %s)"
-    # cursordb.execute(sql, [(user_note), (note)])
-    # connectiondb.commit()
-    # print(cursordb.rowcount, "note saved.")
+    print("note updated")
+
+
+def delete_note(index):
+    print(note_list)
+    # print(index)
+    aws_app.delete_reminder('firstpybucket', note_list[index])
+    note_list_new = aws_app.display_all_reminders('firstpybucket')
+    print(note_list_new)
+    print('note deleted')
 
 
 def exist_note_page():
@@ -212,10 +213,14 @@ def exist_note_page():
     note.geometry("900x800")
     note.config(bg="white")
     tc = ttk.Notebook(note)
+    global content, content_list, note_list
     note_list = aws_app.display_all_reminders('firstpybucket')
+    content = StringVar()
+    content_list = ['' for i in note_list]
 
     current_content = ''
-    for value in note_list:
+    for index, value in enumerate(note_list):
+        content_list[index] = StringVar()
         tab = ttk.Frame(tc)
         tc.add(tab, text=value)
         tc.pack(fill="both")
@@ -224,15 +229,14 @@ def exist_note_page():
         ttk.Label(tab,
                   text=current_content).pack(fill="both")
 
-    global content
-    content = StringVar()
+        Entry(tab,
+              textvariable=content_list[index]).pack(fill='both')
 
-    Entry(note,
-          textvariable=content).pack(fill='both')
-    Button(note, text="Add", bg="blue", fg='white', relief="groove",
-           font=('arial', 12, 'bold'), command=save_note).pack()
-    Button(note, text="Save", bg="blue", fg='white', relief="groove",
-           font=('arial', 12, 'bold'), command=save_note).pack()
+        Button(tab, text="Save", bg="blue", fg='white', relief="groove",
+            font=('arial', 12, 'bold'), command=partial(delete_and_update_note, index)).pack()
+
+        Button(tab, text="Delete", bg="blue", fg='white', relief="groove",
+            font=('arial', 12, 'bold'), command=partial(delete_note, index)).pack()
 
 
 def main_display():

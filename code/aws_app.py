@@ -89,6 +89,7 @@ def display_all_reminders(from_bucket):
     # its just how s3 works
     tmp_list = []
     for obj in client.Bucket(from_bucket).objects.all():
+        print(obj.key)
         tmp_list.append(obj.key)
 
     return tmp_list
