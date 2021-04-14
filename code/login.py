@@ -22,7 +22,7 @@ def login():
     global username_verification
     global password_verification
     Label(root2, text='Please Enter your Account Details', bd=5, font=('arial', 12, 'bold'), relief="groove", fg="white",
-          bg="blue", width=300).pack()
+          bg="#ec7211", width=300).pack()
     username_verification = StringVar()
     password_verification = StringVar()
     Label(root2, text="").pack()
@@ -34,14 +34,13 @@ def login():
           font=('arial', 12, 'bold')).pack()
     Entry(root2, textvariable=password_verification, show="*").pack()
     Label(root2, text="").pack()
-    Button(root2, text="Login", bg="blue", fg='white', relief="groove",
+    Button(root2, text="Login", bg="#ec7211", fg='white', relief="raised",
            font=('arial', 12, 'bold'), command=login_verification).pack()
     Label(root2, text="")
 
 
 def logged_destroy():
     logged_message.destroy()
-    root2.destroy()
 
 
 def failed_destroy():
@@ -52,19 +51,24 @@ def user_exists_destroy():
     user_exists_message.destroy()
 
 
+def no_notes_destroy():
+    exist_note.destroy()
+
+
 def logged():
+    root2.destroy()
     global logged_message
-    logged_message = Toplevel(root2)
+    logged_message = Toplevel(root)
     logged_message.title("Welcome")
     logged_message.geometry("500x200")
-    Label(logged_message, text="Login Successfully!... Welcome {} ".format(
-        username_verification.get()), fg="green", font="bold").pack()
+    Label(logged_message, text="Welcome {}! ".format(
+        username_verification.get()), fg="#ec7211", font="bold").pack()
     Label(logged_message, text="").pack()
-    Button(logged_message, text="Create Note", bg="blue", fg='white', relief="groove",
+    Button(logged_message, text="Create Note", bg="#ec7211", fg='white', relief="raised",
            font=('arial', 12, 'bold'), command=new_note_page).pack()
-    Button(logged_message, text="Edit Note", bg="blue", fg='white', relief="groove",
+    Button(logged_message, text="View Notes", bg="#ec7211", fg='white', relief="raised",
            font=('arial', 12, 'bold'), command=exist_note_page).pack()
-    Button(logged_message, text="Logout", bg="blue", fg='white', relief="groove",
+    Button(logged_message, text="Logout", bg="#ec7211", fg='white', relief="raised",
            font=('arial', 12, 'bold'), command=logged_destroy).pack()
 
 
@@ -76,7 +80,7 @@ def failed():
     Label(failed_message, text="Invalid Username or Password",
           fg="red", font="bold").pack()
     Label(failed_message, text="").pack()
-    Button(failed_message, text="Ok", bg="blue", fg='white', relief="groove",
+    Button(failed_message, text="Ok", bg="#ec7211", fg='white', relief="raised",
            font=('arial', 12, 'bold'), command=failed_destroy).pack()
 
 
@@ -88,7 +92,7 @@ def user_exists():
     Label(user_exists_message, text="Username already exists",
           fg="red", font="bold").pack()
     Label(user_exists_message, text="").pack()
-    Button(user_exists_message, text="Ok", bg="blue", fg='white', relief="groove",
+    Button(user_exists_message, text="Ok", bg="#ec7211", fg='white', relief="raised",
            font=('arial', 12, 'bold'), command=user_exists_destroy).pack()
 
 
@@ -108,7 +112,7 @@ def login_verification():
 
 def Exit():
     wayOut = tkinter.messagebox.askyesno(
-        "Login System", "Do you want to exit the system")
+        "Notes Online", "Do you want to exit the system?")
     if wayOut > 0:
         root.destroy()
         return
@@ -117,12 +121,18 @@ def Exit():
 def create_user():
     user_new = username_new.get()
     pass_new = password_new.get()
+
     sql_insert = "insert into users.users (username, password) values (%s, %s)"
     sql_check = "SELECT username, COUNT(*) FROM users.users WHERE username = %s"
-    cursordb.execute(sql_check, (user_new,))
-    results = cursordb.fetchall()
+
+    cursordb.execute(
+        "SELECT username, COUNT(*) FROM users.users WHERE username = %s GROUP BY username", (user_new,))
+
+    results = cursordb.fetchone()
+
     row_count = cursordb.rowcount
-    if row_count == 0:
+    print(row_count, results)
+    if row_count <= 0:
         cursordb.execute(sql_insert, [(user_new), (pass_new)])
         connectiondb.commit()
         print(cursordb.rowcount, "record inserted.")
@@ -143,7 +153,7 @@ def register():
     global password_new
 
     Label(root2, text='Please Enter your New Account Details', bd=5, font=('arial', 12, 'bold'), relief="groove", fg="white",
-          bg="blue", width=300).pack()
+          bg="#ec7211", width=300).pack()
     username_new = StringVar()
     password_new = StringVar()
     Label(root2, text="").pack()
@@ -155,24 +165,14 @@ def register():
           font=('arial', 12, 'bold')).pack()
     Entry(root2, textvariable=password_new, show="*").pack()
     Label(root2, text="").pack()
-    Button(root2, text="Login", bg="blue", fg='white', relief="groove",
+    Button(root2, text="Register", bg="#ec7211", fg='white', relief="raised",
            font=('arial', 12, 'bold'), command=create_user).pack()
     Label(root2, text="")
 
 
-#################################################
-# in the final version of the app
-# files will be uploaded in bucket
-# with the name of the user (replacing the firstpybucket)
-# when a new user is registered
-# new bucket is created
-# when logged in - variable will hold the name of the user
-# which will be the name of the bucket
-######################################################
 def create_note():
     note = content.get()
     file_name = file_name_temp.get()
-    # file_name = f'{file_name}.txt'
     file_name = f'{file_name}.txt'
     user_note = username_verification.get()
     file = aws_app.create_temp_file(file_name, note)
@@ -181,12 +181,12 @@ def create_note():
 
 
 def new_note_page():
-    global note
-    note = Toplevel(root)
-    note.title("Note")
-    note.geometry("900x800")
-    note.config(bg="white")
-    tc = ttk.Notebook(note)
+    global new_note
+    new_note = Toplevel(root)
+    new_note.title("Note")
+    new_note.geometry("350x400")
+    new_note.config(bg="white")
+    tc = ttk.Notebook(new_note)
 
     tab = ttk.Frame(tc)
     tc.add(tab, text='Notebook')
@@ -202,16 +202,13 @@ def new_note_page():
 
     Entry(tab, textvariable=file_name_temp).pack()
     ttk.Label(tab, text="Note").pack(fill="both")
-    Entry(tab, textvariable=content).pack()
-    Button(tab, text="Add", bg="blue", fg='white', relief="groove",
-           font=('arial', 12, 'bold'), command=create_note).pack()
+    Entry(tab, textvariable=content, width=50).pack()
+    Button(tab, text="Add", bg="#ec7211", fg='white', relief="raised",
+           font=('arial', 12, 'bold'), command=lambda: [create_note(), new_note.destroy()]).pack()
 
 
 def delete_and_update_note(index):
-    # print(note_list)
-    # print(index)
     aws_app.delete_reminder(username_verification.get(), note_list[index])
-    # print(content_list[index].get())
     print('note deleted')
     note = content_list[index].get()
     file_name = note_list[index]
@@ -224,7 +221,6 @@ def delete_and_update_note(index):
 
 def delete_note(index):
     print(note_list)
-    # print(index)
     aws_app.delete_reminder(username_verification.get(), note_list[index])
     note_list_new = aws_app.display_all_reminders(username_verification.get())
     print(note_list_new)
@@ -232,16 +228,15 @@ def delete_note(index):
 
 
 def exist_note_page():
-    global note
-    note = Toplevel(root)
-    note.title("Note")
-    note.geometry("900x800")
-    note.config(bg="white")
-    tc = ttk.Notebook(note)
+    global exist_note
+    exist_note = Toplevel(root)
+    exist_note.title("Note")
+    exist_note.geometry("500x500")
+    exist_note.config(bg="white")
+    tc = ttk.Notebook(exist_note)
     global content, content_list, note_list
     note_list = aws_app.display_all_reminders(username_verification.get())
 
-    # if statement here
     if note_list:
 
         content = StringVar()
@@ -260,40 +255,43 @@ def exist_note_page():
                       text=current_content).pack(fill="both")
 
             Entry(tab,
-                  textvariable=content_list[index]).pack(fill='both')
+                  textvariable=content_list[index], width=50).pack(fill='both')
 
-            Button(tab, text="Save", bg="blue", fg='white', relief="groove",
+            Button(tab, text="Save", bg="#ec7211", fg='white', relief="raised",
                    font=('arial', 12, 'bold'), command=partial(delete_and_update_note, index)).pack()
 
-            Button(tab, text="Delete", bg="blue", fg='white', relief="groove",
+            Button(tab, text="Delete", bg="#ec7211", fg='white', relief="raised",
                    font=('arial', 12, 'bold'), command=partial(delete_note, index)).pack()
+
+            Button(tab, text="Exit", bg="#ec7211", fg='white', relief="raised",
+                   font=('arial', 12, 'bold'), command=exist_note.destroy).pack()
     else:
-        ttk.Label(note,
+        ttk.Label(exist_note,
                   text="No notes. Please create a New Note").pack(fill="both")
-        Button(note, text="Create Note", bg="blue", fg='white', relief="groove",
-               font=('arial', 12, 'bold'), command=new_note_page).pack()
+        Button(exist_note, text="Create Note", bg="#ec7211", fg='white', relief="raised",
+               font=('arial', 12, 'bold'), command=lambda: [new_note_page(), no_notes_destroy()]).pack()
 
 
 def main_display():
     global root
     root = Tk()
     root.config(bg="white")
-    root.title("Login System")
+    root.title("Notes Online")
     root.geometry("500x500")
-    Label(root, text='Welcome to Log In System',  bd=20, font=('arial', 20, 'bold'), relief="groove", fg="white",
-          bg="blue", width=300).pack()
+    Label(root, text='Welcome to Notes Online',  bd=20, font=('arial', 20, 'bold'), relief="groove", fg="white",
+          bg="#ec7211", width=300).pack()
     Label(root, text="").pack()
 
-    Button(root, text='Log In', height="1", width="20", bd=8, font=('arial', 12, 'bold'), relief="groove", fg="white",
-           bg="blue", command=login).pack()
+    Button(root, text='Log In', height="1", width="20", bd=8, font=('arial', 12, 'bold'), relief="raised", fg="white",
+           bg="#ec7211", command=login).pack()
     Label(root, text="").pack()
 
-    Button(root, text='Register', height="1", width="20", bd=8, font=('arial', 12, 'bold'), relief="groove", fg="white",
-           bg="blue", command=register).pack()
+    Button(root, text='Register', height="1", width="20", bd=8, font=('arial', 12, 'bold'), relief="raised", fg="white",
+           bg="#ec7211", command=register).pack()
     Label(root, text="").pack()
 
-    Button(root, text='Exit', height="1", width="20", bd=8, font=('arial', 12, 'bold'), relief="groove", fg="white",
-           bg="blue", command=Exit).pack()
+    Button(root, text='Exit', height="1", width="20", bd=8, font=('arial', 12, 'bold'), relief="raised", fg="white",
+           bg="#ec7211", command=Exit).pack()
     Label(root, text="").pack()
 
 

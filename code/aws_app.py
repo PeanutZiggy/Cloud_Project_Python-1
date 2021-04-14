@@ -1,5 +1,4 @@
 import boto3
-import uuid
 
 client = boto3.resource(
     's3',
@@ -15,7 +14,7 @@ def create_bucket(bucket_prefix, s3_connection):
     bucket_response = s3_connection.create_bucket(
         Bucket=bucket_name,
         CreateBucketConfiguration={
-            'LocationConstraint': 'eu-west-2'})
+            'LocationConstraint': 'eu-west-1'})
 
     return bucket_name
 
@@ -70,24 +69,6 @@ def delete_all_reminders(from_bucket):
 
 
 def display_all_reminders(from_bucket):
-    # temp_dict = {}
-    # num = len(client.Bucket(from_bucket).objects.all())
-    # if num > 0:
-    #     for obj in client.Bucket(from_bucket).objects.all():
-    #         print(obj.key)
-    #         temp_dict[obj.key] = obj.value
-    #     return temp_dict
-    # else:
-    #     print('bucket is empty')
-
-    # temp_dict = {}
-    # for obj in client.Bucket(from_bucket).objects.all():
-    #     print(obj.key)
-    #     temp_dict[obj.key] = obj.value
-    # return temp_dict
-
-    # it says key but that does not mean that it is a dictionary
-    # its just how s3 works
     tmp_list = []
     for obj in client.Bucket(from_bucket).objects.all():
         print(obj.key)
