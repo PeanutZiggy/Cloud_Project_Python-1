@@ -17,7 +17,8 @@ def create_bucket(bucket_prefix, s3_connection):
         CreateBucketConfiguration={
             'LocationConstraint': 'eu-west-2'})
 
-    return bucket_name, bucket_response
+    return bucket_name
+
 
 # Create Model - Aim of this function is to create the model that would accept users input for reminder.
 
@@ -47,10 +48,10 @@ def create_temp_file(file_name, content):
 # Upload Reminder  - Aim of this function is to upload reminders.
 
 
-def upload_reminder():
+def upload_reminder(bucket):
     tmp_file = create_temp_file("test3")
 
-    upload_file("firstpybucket", tmp_file)
+    upload_file(bucket, tmp_file)
 
 # Delete Reminders - Aim of this function is to remove existing reminders.
 

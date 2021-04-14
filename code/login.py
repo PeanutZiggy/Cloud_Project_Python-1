@@ -48,6 +48,10 @@ def failed_destroy():
     failed_message.destroy()
 
 
+def user_exists_destroy():
+    user_exists_message.destroy()
+
+
 def logged():
     global logged_message
     logged_message = Toplevel(root2)
@@ -76,6 +80,18 @@ def failed():
            font=('arial', 12, 'bold'), command=failed_destroy).pack()
 
 
+def user_exists():
+    global user_exists_message
+    user_exists_message = Toplevel(root2)
+    user_exists_message.title("Invalid Username")
+    user_exists_message.geometry("500x100")
+    Label(user_exists_message, text="Username already exists",
+          fg="red", font="bold").pack()
+    Label(user_exists_message, text="").pack()
+    Button(user_exists_message, text="Ok", bg="blue", fg='white', relief="groove",
+           font=('arial', 12, 'bold'), command=user_exists_destroy).pack()
+
+
 def login_verification():
     user_verification = username_verification.get()
     pass_verification = password_verification.get()
@@ -101,11 +117,19 @@ def Exit():
 def create_user():
     user_new = username_new.get()
     pass_new = password_new.get()
-    sql = "insert into users.users (username, password) values (%s, %s)"
-    cursordb.execute(sql, [(user_new), (pass_new)])
-    connectiondb.commit()
-    print(cursordb.rowcount, "record inserted.")
-    create_bucket(user_new, client)
+    sql_insert = "insert into users.users (username, password) values (%s, %s)"
+    sql_check = "SELECT username, COUNT(*) FROM users.users WHERE username = %s"
+    cursordb.execute(sql_check, (user_new,))
+    results = cursordb.fetchall()
+    row_count = cursordb.rowcount
+    if row_count == 0:
+        cursordb.execute(sql_insert, [(user_new), (pass_new)])
+        connectiondb.commit()
+        print(cursordb.rowcount, "record inserted.")
+        aws_app.create_bucket(user_new, aws_app.client)
+        root2.destroy()
+    else:
+        user_exists()
 
 
 def register():
@@ -148,10 +172,11 @@ def register():
 def create_note():
     note = content.get()
     file_name = file_name_temp.get()
+    # file_name = f'{file_name}.txt'
     file_name = f'{file_name}.txt'
     user_note = username_verification.get()
     file = aws_app.create_temp_file(file_name, note)
-    aws_app.upload_file('firstpybucket', file)
+    aws_app.upload_file(username_verification.get(), file)
     print("note saved")
 
 
@@ -185,7 +210,7 @@ def new_note_page():
 def delete_and_update_note(index):
     # print(note_list)
     # print(index)
-    aws_app.delete_reminder('firstpybucket', note_list[index])
+    aws_app.delete_reminder(username_verification.get(), note_list[index])
     # print(content_list[index].get())
     print('note deleted')
     note = content_list[index].get()
@@ -193,15 +218,15 @@ def delete_and_update_note(index):
     file_name = f'{file_name}.txt'
     user_note = username_verification.get()
     file = aws_app.create_temp_file(file_name, note)
-    aws_app.upload_file('firstpybucket', file)
+    aws_app.upload_file(username_verification.get(), file)
     print("note updated")
 
 
 def delete_note(index):
     print(note_list)
     # print(index)
-    aws_app.delete_reminder('firstpybucket', note_list[index])
-    note_list_new = aws_app.display_all_reminders('firstpybucket')
+    aws_app.delete_reminder(username_verification.get(), note_list[index])
+    note_list_new = aws_app.display_all_reminders(username_verification.get())
     print(note_list_new)
     print('note deleted')
 
@@ -214,29 +239,39 @@ def exist_note_page():
     note.config(bg="white")
     tc = ttk.Notebook(note)
     global content, content_list, note_list
-    note_list = aws_app.display_all_reminders('firstpybucket')
-    content = StringVar()
-    content_list = ['' for i in note_list]
+    note_list = aws_app.display_all_reminders(username_verification.get())
 
-    current_content = ''
-    for index, value in enumerate(note_list):
-        content_list[index] = StringVar()
-        tab = ttk.Frame(tc)
-        tc.add(tab, text=value)
-        tc.pack(fill="both")
-        current_content = aws_app.get_reminder_text('firstpybucket', value)
+    # if statement here
+    if note_list:
 
-        ttk.Label(tab,
-                  text=current_content).pack(fill="both")
+        content = StringVar()
+        content_list = ['' for i in note_list]
 
-        Entry(tab,
-              textvariable=content_list[index]).pack(fill='both')
+        current_content = ''
+        for index, value in enumerate(note_list):
+            content_list[index] = StringVar()
+            tab = ttk.Frame(tc)
+            tc.add(tab, text=value)
+            tc.pack(fill="both")
+            current_content = aws_app.get_reminder_text(
+                username_verification.get(), value)
 
-        Button(tab, text="Save", bg="blue", fg='white', relief="groove",
-            font=('arial', 12, 'bold'), command=partial(delete_and_update_note, index)).pack()
+            ttk.Label(tab,
+                      text=current_content).pack(fill="both")
 
-        Button(tab, text="Delete", bg="blue", fg='white', relief="groove",
-            font=('arial', 12, 'bold'), command=partial(delete_note, index)).pack()
+            Entry(tab,
+                  textvariable=content_list[index]).pack(fill='both')
+
+            Button(tab, text="Save", bg="blue", fg='white', relief="groove",
+                   font=('arial', 12, 'bold'), command=partial(delete_and_update_note, index)).pack()
+
+            Button(tab, text="Delete", bg="blue", fg='white', relief="groove",
+                   font=('arial', 12, 'bold'), command=partial(delete_note, index)).pack()
+    else:
+        ttk.Label(note,
+                  text="No notes. Please create a New Note").pack(fill="both")
+        Button(note, text="Create Note", bg="blue", fg='white', relief="groove",
+               font=('arial', 12, 'bold'), command=new_note_page).pack()
 
 
 def main_display():
